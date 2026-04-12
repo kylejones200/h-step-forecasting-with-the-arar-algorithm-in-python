@@ -1,0 +1,53 @@
+data:
+  input_file: "ercot_load_data.csv"
+  date_col: "date"
+  value_col: "values"
+  resample:
+    enabled: false
+    freq: "15min"
+    method: "mean"
+
+model:
+  train_size: 0.85
+  differenced: true
+  lag_method: "powers_of_2"   # powers_of_2 | custom | auto
+  max_lag: 16
+  custom_lags: [1, 2, 4, 8, 16]
+  forecast_horizon: 96
+
+evaluation:
+  horizon: 96
+  compare_arima:
+    enabled: true
+    order: [2, 1, 2]
+
+plotting:
+  style:
+    spines:
+      top: false
+      right: false
+      bottom: true
+      left: true
+    grid: false
+    legend:
+      frameon: false
+      loc: "best"
+    figure:
+      figsize: [12, 6]
+      dpi: 150
+    colors:
+      primary: "k"
+      secondary: "r"
+      accent: "b"
+    linewidth: 1.5
+    markersize: 4
+    alpha: 0.7
+
+output:
+  plot_format: "png"
+  save_plots: true
+  output_dir: "outputs"
+  plots:
+    historical: "arar_series_visualization.png"
+    forecast: "arar_forecast_vs_actual.png"
+    comparison: "arar_vs_arima_forecast.png"
