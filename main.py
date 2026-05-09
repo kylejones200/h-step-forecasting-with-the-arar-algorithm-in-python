@@ -10,6 +10,12 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -94,17 +100,17 @@ def main():
     
     # Load data
     series = load_series(config)
-    print(f"Loaded {len(series)} data points")
+    logger.info(f"Loaded {len(series)} data points")
     
     # Split train/test using consolidated evaluator
     evaluator = Evaluator(test_size=config.get("evaluation", {}).get("test_size", 0.2))
     train, test = evaluator.split(series)
     
     # Fit models
-    print("\nFitting ARAR model...")
+    logger.info("\nFitting ARAR model...")
     arar_model = fit_arar_model(train, config)
     
-    print("\nFitting ARIMA model for comparison...")
+    logger.info("\nFitting ARIMA model for comparison...")
     arima_model = fit_arima_model(train, config)
     
     # Generate forecasts
@@ -124,8 +130,8 @@ def main():
     arima_rmse = np.sqrt(mean_squared_error(test, arima_forecast_series))
     arima_mape = mean_absolute_percentage_error(test, arima_forecast_series)
     
-    print(f"\nARAR - MAE: {arar_mae:.4f}, RMSE: {arar_rmse:.4f}, MAPE: {arar_mape:.4f}%")
-    print(f"ARIMA - MAE: {arima_mae:.4f}, RMSE: {arima_rmse:.4f}, MAPE: {arima_mape:.4f}%")
+    logger.info(f"\nARAR - MAE: {arar_mae:.4f}, RMSE: {arar_rmse:.4f}, MAPE: {arar_mape:.4f}%")
+    logger.info(f"ARIMA - MAE: {arima_mae:.4f}, RMSE: {arima_rmse:.4f}, MAPE: {arima_mape:.4f}%")
     
     # Create visualization
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -144,9 +150,9 @@ def main():
     # Save plot using consolidated utility
     output_dir = ensure_output_dir(get_output_dir(config, script_dir))
     save_plot(fig, output_dir / "arar_comparison.png", dpi=300)
-    print(f"\nPlot saved to: {output_dir / 'arar_comparison.png'}")
+    logger.info(f"\nPlot saved to: {output_dir / 'arar_comparison.png'}")
     
-    print("\n ARAR forecasting complete")
+    logger.info("\n ARAR forecasting complete")
     
     if config.get("plotting", {}).get("show_plot", True):
         plt.show()
