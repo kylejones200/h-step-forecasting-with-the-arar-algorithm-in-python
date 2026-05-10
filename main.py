@@ -91,7 +91,7 @@ def fit_arima_model(train_data: pd.Series, config: Dict):
     return model
 
 
-def main():
+def main(plot: bool = False):
     """Main execution function."""
     script_dir = Path(__file__).parent
     
@@ -134,30 +134,31 @@ def main():
     logger.info(f"ARIMA - MAE: {arima_mae:.4f}, RMSE: {arima_rmse:.4f}, MAPE: {arima_mape:.4f}%")
     
     # Create visualization
-    fig, ax = plt.subplots(figsize=(12, 6))
+    if plot:
+        fig, ax = plt.subplots(figsize=(12, 6))
     
-    ax.plot(train.index, train.values, "k-", linewidth=1.5, label="Historical (Train)", alpha=0.8)
-    ax.plot(test.index, test.values, "g-", linewidth=1.5, label="Actual (Test)", alpha=0.8)
-    ax.plot(test.index, arar_forecast_series.values, "r--", linewidth=1.5, label=f"ARAR Forecast (MAE: {arar_mae:.4f})", alpha=0.8)
-    ax.plot(test.index, arima_forecast_series.values, "b--", linewidth=1.5, label=f"ARIMA Forecast (MAE: {arima_mae:.4f})", alpha=0.8)
+        ax.plot(train.index, train.values, "k-", linewidth=1.5, label="Historical (Train)", alpha=0.8)
+        ax.plot(test.index, test.values, "g-", linewidth=1.5, label="Actual (Test)", alpha=0.8)
+        ax.plot(test.index, arar_forecast_series.values, "r--", linewidth=1.5, label=f"ARAR Forecast (MAE: {arar_mae:.4f})", alpha=0.8)
+        ax.plot(test.index, arima_forecast_series.values, "b--", linewidth=1.5, label=f"ARIMA Forecast (MAE: {arima_mae:.4f})", alpha=0.8)
     
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Value")
-    ax.set_title("ARAR vs ARIMA Forecast Comparison")
-    ax.legend(loc="best")
-    ax.grid(True, alpha=0.3)
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Value")
+        ax.set_title("ARAR vs ARIMA Forecast Comparison")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3)
     
     # Save plot using consolidated utility
-    output_dir = ensure_output_dir(get_output_dir(config, script_dir))
-    save_plot(fig, output_dir / "arar_comparison.png", dpi=300)
-    logger.info(f"\nPlot saved to: {output_dir / 'arar_comparison.png'}")
+        output_dir = ensure_output_dir(get_output_dir(config, script_dir))
+        save_plot(fig, output_dir / "arar_comparison.png", dpi=300)
+        logger.info(f"\nPlot saved to: {output_dir / 'arar_comparison.png'}")
     
-    logger.info("\n ARAR forecasting complete")
+        logger.info("\n ARAR forecasting complete")
     
-    if config.get("plotting", {}).get("show_plot", True):
-        plt.show()
-    else:
-        plt.close(fig)
+        if config.get("plotting", {}).get("show_plot", True):
+            plt.show()
+        else:
+            plt.close(fig)
 
 
 if __name__ == "__main__":
