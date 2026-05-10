@@ -42,49 +42,44 @@ We will implement the ARAR algorithm using a dataset from ERCOT, the grid balanc
 
 ## Loading and Preprocessing Data
 
-    from statsmodels.tsa.ar_model import AutoReg
-    from statsmodels.tsa.stattools import acf
-    from sklearn.metrics import mean_absolute_percentage_error
+from statsmodels.tsa.ar_model import AutoReg from statsmodels.tsa.stattools import acf from sklearn.metrics import mean_absolute_percentage_error
 
     # Load dataset
-    data = pd.read_csv("ercot_load_data.csv", parse_dates=["date"], index_col="date")
-    y = data["values"]
+data = pd.read_csv("ercot_load_data.csv", parse_dates=["date"], index_col="date") y = data["values"]
 
     # Set the Date index to 15 min frequency
-    data = data.asfreq("15min")
+data = data.asfreq("15min")
 
     # Define forecast horizon (1 day = 96 steps)
-    h = 96
+h = 96
 
     # Split data: training (everything except last 96 values) and test (last 96 values)
-    train, test = y.iloc[:-h], y.iloc[-h:]
+train, test = y.iloc[:-h], y.iloc[-h:]
 
     # Apply differencing on training data for ARAR
-    z_train = np.diff(train)
+z_train = np.diff(train)
 
     # Compute autocorrelation and select reduced lags (powers of 2)
-    acf_vals = acf(z_train, nlags=20)
-    lags = [1, 2, 4, 8, 16]  # Selected lag set
+acf_vals = acf(z_train, nlags=20) lags = [1, 2, 4, 8, 16] # Selected lag set
 
 ## Fitting the ARAR Model
 
 The ARAR algorithm fits an autoregressive model using a reduced set of lags. In this example, we use lags at powers of two, which balance complexity and historical information retention.
 
     # Fit ARAR model
-    arar_model = AutoReg(z_train, lags=lags, old_names=False).fit()
+arar_model = AutoReg(z_train, lags=lags, old_names=False).fit()
 
     # Generate forecasts for next 96 steps
-    future_forecast_arar = arar_model.predict(start=len(z_train), end=len(z_train) + h - 1)
+future_forecast_arar = arar_model.predict(start=len(z_train), end=len(z_train) + h - 1)
 
     # Reverse differencing to reconstruct the original scale
-    y_forecast_arar = np.cumsum(future_forecast_arar) + train.iloc[-1]
+y_forecast_arar = np.cumsum(future_forecast_arar) + train.iloc[-1]
 
     # Create new time index for forecasts
-    forecast_index = pd.date_range(start=train.index[-1], periods=h+1, freq="15min")[1:]
+forecast_index = pd.date_range(start=train.index[-1], periods=h+1, freq="15min")[1:]
 
     # Compute MAPE for ARAR
-    mape_arar = mean_absolute_percentage_error(test, y_forecast_arar)
-    print(f"MAPE for ARAR: {mape_arar:.4f}")
+mape_arar = mean_absolute_percentage_error(test, y_forecast_arar) print(f"MAPE for ARAR: {mape_arar:.4f}")
 
 ![image](img/arar_forecast_plot_fixed.png)
 
@@ -92,25 +87,23 @@ The ARAR algorithm fits an autoregressive model using a reduced set of lags. In 
 
 To demonstrate the effectiveness of ARAR, we compare its performance with an ARIMA model.
 
-    from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.arima.model import ARIMA
 
     # Fit ARIMA(2,1,2) model
-    arima_model = ARIMA(train, order=(2,1,2)).fit()
+arima_model = ARIMA(train, order=(2,1,2)).fit()
 
     # Generate forecasts for next 96 steps
-    y_forecast_arima = arima_model.forecast(steps=h)
+y_forecast_arima = arima_model.forecast(steps=h)
 
     # Convert forecast index to match ARIMA output
-    y_forecast_arima.index = forecast_index
+y_forecast_arima.index = forecast_index
 
     # Compute MAPE for ARIMA
-    mape_arima = mean_absolute_percentage_error(test, y_forecast_arima)
-    print(f"MAPE for ARIMA: {mape_arima:.4f}")
+mape_arima = mean_absolute_percentage_error(test, y_forecast_arima) print(f"MAPE for ARIMA: {mape_arima:.4f}")
 
 ## Performance Results
 
-    MAPE for ARAR: 0.0646
-    MAPE for ARIMA: 0.0964
+MAPE for ARAR: 0.0646 MAPE for ARIMA: 0.0964
 
 - **ARAR outperforms ARIMA** in this case, demonstrating its effectiveness for short-term dependencies.
 
@@ -119,24 +112,20 @@ To demonstrate the effectiveness of ARAR, we compare its performance with an ARI
 ## Visualizing the Forecasts
 
     # Plot full time series with forecasted values
-    plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 6))
 
     # Plot full historical series
-    plt.plot(y.index, y, label="Historical Data", linestyle="-", color="blue")
+plt.plot(y.index, y, label="Historical Data", linestyle="-", color="blue")
 
     # Plot ARAR forecast
-    plt.plot(forecast_index, y_forecast_arar, label="ARAR Forecast", linestyle="dashed", color="red")
+plt.plot(forecast_index, y_forecast_arar, label="ARAR Forecast", linestyle="dashed", color="red")
 
     # Plot ARIMA forecast
-    plt.plot(forecast_index, y_forecast_arima, label="ARIMA Forecast", linestyle="dotted", color="green")
+plt.plot(forecast_index, y_forecast_arima, label="ARIMA Forecast", linestyle="dotted", color="green")
 
-    plt.xlabel("Time")
-    plt.ylabel("Value")
-    plt.title(f"Full Time Series with ARAR vs ARIMA Forecasts\nMAPE (ARAR): {mape_arar:.4f}, MAPE (ARIMA): {mape_arima:.4f}")
-    plt.legend()
+plt.xlabel("Time") plt.ylabel("Value") plt.title(f"Full Time Series with ARAR vs ARIMA Forecasts\nMAPE (ARAR): {mape_arar:.4f}, MAPE (ARIMA): {mape_arima:.4f}") plt.legend()
 
-    plt.savefig("arar_vs_arima_forecast.png")
-    plt.show()
+plt.savefig("arar_vs_arima_forecast.png") plt.show()
 
 ![image](img/arar_vs_arima_hourly_forecast.png)
 
