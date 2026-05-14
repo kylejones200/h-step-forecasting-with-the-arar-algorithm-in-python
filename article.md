@@ -4,9 +4,9 @@
 
 In time series forecasting, h-step forecasting refers to predicting multiple time steps into the future. This is particularly challenging because uncertainty increases with each step forward. The key challenge lies in capturing both:
 
-- **Short-Term Fluctuations:** Immediate patterns and noise in the data.
+- Short-Term Fluctuations: Immediate patterns and noise in the data.
 
-- **Long-Term Trends:** Underlying trends that persist over time.
+- Long-Term Trends: Underlying trends that persist over time.
 
 The AutoRegressive-to-AutoRegressive (ARAR) algorithm is especially effective for time series with strong short-term dependencies but weak long-term correlations. It offers a simpler alternative to ARIMA for multi-step forecasting by:
 
@@ -20,21 +20,21 @@ The AutoRegressive-to-AutoRegressive (ARAR) algorithm is especially effective fo
 
 The ARAR algorithm has three main stages:
 
-1.  **Data Preprocessing:** The series undergoes transformation and differencing to stabilize variance and remove non-stationarity.
+1.  Data Preprocessing: The series undergoes transformation and differencing to stabilize variance and remove non-stationarity.
 
-2.  **Reduced Lag Selection:** A subset of lagged values is selected using a heuristic approach, typically at powers of two (e.g., 1, 2, 4, 8, \...).
+2.  Reduced Lag Selection: A subset of lagged values is selected using a heuristic approach, typically at powers of two (e.g., 1, 2, 4, 8, \...).
 
-3.  **Final AR Modeling:** An autoregressive (AR) model is fitted to the transformed data using the reduced lag set.
+3.  Final AR Modeling: An autoregressive (AR) model is fitted to the transformed data using the reduced lag set.
 
 The ARAR approach focuses on parsimony by modeling only significant autocorrelations, ensuring the model remains efficient without losing predictive power.
 
 ## Why Use ARAR?
 
-- **Computational Efficiency:** Reduced lag selection minimizes complexity, leading to faster computations.
+- Computational Efficiency: Reduced lag selection minimizes complexity, leading to faster computations.
 
-- **Robust Forecasting:** It effectively captures short-term dependencies while maintaining simplicity.
+- Robust Forecasting: It effectively captures short-term dependencies while maintaining simplicity.
 
-- **Practical Implementation:** ARAR provides a straightforward approach suitable for real-world applications.
+- Practical Implementation: ARAR provides a straightforward approach suitable for real-world applications.
 
 # Python Implementation of ARAR Forecasting
 
@@ -105,9 +105,9 @@ mape_arima = mean_absolute_percentage_error(test, y_forecast_arima) print(f"MAPE
 
 MAPE for ARAR: 0.0646 MAPE for ARIMA: 0.0964
 
-- **ARAR outperforms ARIMA** in this case, demonstrating its effectiveness for short-term dependencies.
+- ARAR outperforms ARIMA in this case, demonstrating its effectiveness for short-term dependencies.
 
-- **ARIMA** has a higher MAPE, possibly due to overfitting or excessive differencing.
+- ARIMA has a higher MAPE, possibly due to overfitting or excessive differencing.
 
 ## Visualizing the Forecasts
 
@@ -131,19 +131,19 @@ plt.savefig("arar_vs_arima_forecast.png") plt.show()
 
 ## Results Analysis
 
-- **ARAR Forecast:** Captures short-term fluctuations accurately with lower MAPE.
+- ARAR Forecast: Captures short-term fluctuations accurately with lower MAPE.
 
-- **ARIMA Forecast:** Shows more deviation from actual values, reflecting its struggle with short-term patterns.
+- ARIMA Forecast: Shows more deviation from actual values, reflecting its struggle with short-term patterns.
 
-- **ARAR is Superior:** The ARAR algorithm is more effective for this dataset due to its parsimonious design and reduced lag selection.
+- ARAR is Superior: The ARAR algorithm is more effective for this dataset due to its parsimonious design and reduced lag selection.
 
 # Advantages of ARAR for H-Step Forecasting
 
-- **Efficient for Short-Term Dependencies:** Captures immediate patterns without excessive complexity.
+- Efficient for Short-Term Dependencies: Captures immediate patterns without excessive complexity.
 
-- **Reduced Computational Burden:** Lag reduction minimizes computation while preserving predictive power.
+- Reduced Computational Burden: Lag reduction minimizes computation while preserving predictive power.
 
-- **Comparable Accuracy to ARIMA:** Achieves similar or better accuracy with fewer parameters.
+- Comparable Accuracy to ARIMA: Achieves similar or better accuracy with fewer parameters.
 
 The ARAR algorithm provides an effective approach to h-step forecasting by:
 
@@ -157,7 +157,7 @@ H-step forecasting requires a balance between capturing short-term variations an
 
 ## Key Takeaways
 
-- **Short-Term Fluctuations:** Immediate patterns and noise in the data.
-- **Long-Term Trends:** Underlying trends that persist over time.
+- Short-Term Fluctuations: Immediate patterns and noise in the data.
+- Long-Term Trends: Underlying trends that persist over time.
 - Using a reduced set of lagged values.
 - Avoiding unnecessary complexity in differencing.
