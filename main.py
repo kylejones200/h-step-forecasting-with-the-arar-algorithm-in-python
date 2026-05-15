@@ -6,9 +6,7 @@ Refactored to support config-driven workflows, evaluation, and comparison with A
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Dict, List
 
 import logging
 logging.basicConfig(
@@ -39,7 +37,6 @@ from sklearn.metrics import (
 )
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.stattools import acf
 
 
 def resolve_data_path(input_file: str) -> Path:
@@ -54,7 +51,7 @@ def resolve_data_path(input_file: str) -> Path:
     return path
 
 
-def load_series(config: Dict) -> pd.Series:
+def load_series(config: dict) -> pd.Series:
     """Load time series with optional resampling."""
     # Use consolidated loader
     series = load_time_series(
@@ -76,14 +73,14 @@ def load_series(config: Dict) -> pd.Series:
     return series
 
 
-def fit_arar_model(train_data: pd.Series, config: Dict) -> AutoReg:
+def fit_arar_model(train_data: pd.Series, config: dict) -> AutoReg:
     """Fit ARAR model."""
     max_lag = config["model"].get("max_lag", 5)
     model = AutoReg(train_data, lags=max_lag).fit()
     return model
 
 
-def fit_arima_model(train_data: pd.Series, config: Dict):
+def fit_arima_model(train_data: pd.Series, config: dict):
     """Fit ARIMA model for comparison."""
     order = tuple(config["model"].get("arima_order", (1, 1, 1)))
     model = ARIMA(train_data, order=order).fit()
