@@ -1,6 +1,22 @@
-# Repository
+# H-Step Forecasting with the ARAR Algorithm in Python using statsmodels
 
-Companion code for a Medium article.
+
+## The problem
+
+Companion materials for **H-Step Forecasting with the ARAR Algorithm in Python using statsmodels** — see `article.md` for the full narrative.
+
+## Companion code
+
+This folder holds reproducible Python for the Medium piece: `main.py`, `config.yaml`, `src/`, `article.md` (full article export).
+
+## Reproduce
+
+Requires [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync
+uv run python main.py
+```
 
 ## Disclaimer
 
