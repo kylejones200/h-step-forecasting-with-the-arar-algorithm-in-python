@@ -9,12 +9,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
-# Add src to path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -23,8 +17,6 @@ from sklearn.metrics import (
     mean_absolute_percentage_error,
     mean_squared_error,
 )
-
-# Import consolidated utilities (signalplot already applied in src/__init__.py)
 from src import (
     ensure_output_dir,
     get_output_dir,
@@ -35,6 +27,15 @@ from src import (
 from src.evaluator import Evaluator
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.arima.model import ARIMA
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+# Add src to path
+
+
+# Import consolidated utilities (signalplot already applied in src/__init__.py)
 
 
 def resolve_data_path(input_file: str) -> Path:
@@ -54,10 +55,9 @@ def load_series(config: dict) -> pd.Series:
     # Use consolidated loader
     series = load_time_series(
         str(resolve_data_path(config["data"]["input_file"])),
-        date_column=config["data"].get("date_col", "date"),
-        value_column=config["data"].get("value_col", "value"),
+        date_col=config["data"].get("date_col", "date"),
+        value_col=config["data"].get("value_col", "value"),
     ).sort_index()
-
     # Apply resampling if configured
     resample_cfg = config["data"].get("resample", {})
     if resample_cfg.get("enabled"):
@@ -89,53 +89,41 @@ def fit_arima_model(train_data: pd.Series, config: dict):
 def main(plot: bool = False):
     """Main execution function."""
     script_dir = Path(__file__).parent
-
     # Load configuration using consolidated loader
     config = load_config()
-
     # Load data
     series = load_series(config)
     logger.info(f"Loaded {len(series)} data points")
-
     # Split train/test using consolidated evaluator
     evaluator = Evaluator(test_size=config.get("evaluation", {}).get("test_size", 0.2))
     train, test = evaluator.split(series)
-
     # Fit models
     logger.info("\nFitting ARAR model...")
     arar_model = fit_arar_model(train, config)
-
     logger.info("\nFitting ARIMA model for comparison...")
     arima_model = fit_arima_model(train, config)
-
     # Generate forecasts
     arar_forecast = arar_model.forecast(steps=len(test))
     arima_forecast = arima_model.forecast(steps=len(test))
-
     # Align forecasts with test index
     arar_forecast_series = pd.Series(arar_forecast, index=test.index)
     arima_forecast_series = pd.Series(arima_forecast, index=test.index)
-
     # Evaluate
     arar_mae = mean_absolute_error(test, arar_forecast_series)
     arar_rmse = np.sqrt(mean_squared_error(test, arar_forecast_series))
     arar_mape = mean_absolute_percentage_error(test, arar_forecast_series)
-
     arima_mae = mean_absolute_error(test, arima_forecast_series)
     arima_rmse = np.sqrt(mean_squared_error(test, arima_forecast_series))
     arima_mape = mean_absolute_percentage_error(test, arima_forecast_series)
-
     logger.info(
         f"\nARAR - MAE: {arar_mae:.4f}, RMSE: {arar_rmse:.4f}, MAPE: {arar_mape:.4f}%"
     )
     logger.info(
         f"ARIMA - MAE: {arima_mae:.4f}, RMSE: {arima_rmse:.4f}, MAPE: {arima_mape:.4f}%"
     )
-
     # Create visualization
     if plot:
         fig, ax = plt.subplots(figsize=(12, 6))
-
         ax.plot(
             train.index,
             train.values,
@@ -168,20 +156,17 @@ def main(plot: bool = False):
             label=f"ARIMA Forecast (MAE: {arima_mae:.4f})",
             alpha=0.8,
         )
-
         ax.set_xlabel("Date")
         ax.set_ylabel("Value")
         ax.set_title("ARAR vs ARIMA Forecast Comparison")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
-
         # Save plot using consolidated utility
-        output_dir = ensure_output_dir(get_output_dir(config, script_dir))
-        save_plot(fig, output_dir / "arar_comparison.png", dpi=300)
+        output_dir = ensure_output_dir(config)
+        fig.savefig(output_dir / "arar_comparison.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
         logger.info(f"\nPlot saved to: {output_dir / 'arar_comparison.png'}")
-
         logger.info("\n ARAR forecasting complete")
-
         if config.get("plotting", {}).get("show_plot", True):
             plt.show()
         else:
